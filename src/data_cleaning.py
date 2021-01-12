@@ -20,9 +20,7 @@ data = data.merge(stores, how='left', on=['Store'])
 data['Month'] = data['Date'].dt.month
 data.drop(columns=['MarkDown1', 'MarkDown2', 'MarkDown3', 'MarkDown4', 'MarkDown5'], inplace=True)
 
-mask = data['Date'] <= '2011-10-30'
-train = data[mask]
-test = data[~mask]
+trainval, test = train_test_split(data, stratify=data['Date'], test_size=0.33, random_state=0)
 
 cont_cols = ['Temperature', 'Fuel_Price', 'CPI', 'Unemployment','Size']
 disc_cols = ['Store', 'Dept', 'Type', 'Month']
@@ -32,8 +30,8 @@ encode_lst = [([disc_col], OneHotEncoder(sparse=False)) for disc_col in disc_col
 transformers.extend(encode_lst)
 
 mapper = DataFrameMapper(transformers, default=None, df_out=True)
-train_scale = mapper.fit_transform(train)
+trainval_scale = mapper.fit_transform(trainval)
 test_scale = mapper.transform(test)
 
-train_scale.to_csv('../data/train_clean.csv')
+trainval_scale.to_csv('../data/train_clean.csv')
 test_scale.to_csv('../data/test_clean.csv')
